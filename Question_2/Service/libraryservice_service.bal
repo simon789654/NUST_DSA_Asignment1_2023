@@ -25,7 +25,7 @@ map<json> Users = {
     "1103": {user_id: "1103", user_type: "librarian", name: "Kev Ndec"}
 };
 
-listener grpc:Listener ep = new (9088);
+listener grpc:Listener ep = new (9082);
 
 @grpc:Descriptor {value: LIBRARY_DESC}
 service "LibraryService" on ep {
@@ -35,13 +35,13 @@ service "LibraryService" on ep {
             return error("book already exist");
         }
         booksDB[value.isbn] = value;
-        string response = "Book with isbn number " + value.isbn + " is sucessfully added.";
+        string response = "The book with isbn number " + value.isbn + " sucessfully added";
         return response;
     }
     remote function UpdateBook(Book value) returns Book|error {
         json isbook = booksDB[value.isbn];
         if (isbook == null) {
-            return error("The book doesn't exist!");
+            return error("The book doesn't exist");
         }
         booksDB[value.isbn] = <Book>value;
 
@@ -50,7 +50,7 @@ service "LibraryService" on ep {
     remote function RemoveBook(BookRequest value) returns BooksResponse|error {
         json isbook = booksDB[value.isbn];
         if (isbook == null) {
-            return error("The book doesn't exist!");
+            return error("The book doesn't exist");
         }
         _ = booksDB.remove(value.isbn);
 
@@ -63,11 +63,11 @@ service "LibraryService" on ep {
     remote function LocateBook(BookRequest value) returns BookLocationResponse|error {
         json isbook = booksDB[value.isbn];
         if (isbook == null) {
-            return error("The book doesn't exist!");
+            return error("The book doesn't exist");
         }
 
         if (isbook?.status != "Available") {
-            return error("The book is not available!");
+            return error("The book is not available");
         }
 
         BookLocationResponse response = {};
@@ -78,7 +78,7 @@ service "LibraryService" on ep {
     remote function BorrowBook(BorrowBookRequest value) returns BorrowBookResponse|error {
         Book isbook = <Book>booksDB[value.isbn];
         if (isbook.isbn == "") {
-            return error("The book doesn't exist!");
+            return error("The book doesn't exist");
         }
 
         json isUser = Users[value.user_id];
@@ -88,7 +88,7 @@ service "LibraryService" on ep {
 
         isbook.status = "Not Available";
         booksDB[value.isbn] = isbook;
-        return {message: "Book sucessfully borrowed."};
+        return {message: "The book with isbn number " + value.isbn + " sucessfully borrowed"};
     }
     remote function CreateUsers(stream<UserRequest, grpc:Error?> clientStream) returns string|error {
         error? e = clientStream.forEach(function(UserRequest user) {
